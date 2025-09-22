@@ -12,8 +12,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Remove 'restored' from the enum, keeping only the actions we need
-        DB::statement("ALTER TABLE product_logs MODIFY COLUMN action ENUM('created', 'updated', 'deleted', 'force_deleted') NOT NULL");
+        // Check if we're using MySQL (Railway uses MySQL)
+        if (DB::getDriverName() === 'mysql') {
+            // Remove 'restored' from the enum for MySQL
+            DB::statement("ALTER TABLE product_logs MODIFY COLUMN action ENUM('created', 'updated', 'deleted', 'force_deleted') NOT NULL");
+        }
+        // For SQLite, we don't need to modify the enum as it's not strictly enforced
     }
 
     /**
@@ -21,7 +25,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Add 'restored' back if needed
-        DB::statement("ALTER TABLE product_logs MODIFY COLUMN action ENUM('created', 'updated', 'deleted', 'restored', 'force_deleted') NOT NULL");
+        // Check if we're using MySQL
+        if (DB::getDriverName() === 'mysql') {
+            // Add 'restored' back if needed for MySQL
+            DB::statement("ALTER TABLE product_logs MODIFY COLUMN action ENUM('created', 'updated', 'deleted', 'restored', 'force_deleted') NOT NULL");
+        }
+        // For SQLite, no action needed
     }
 };
